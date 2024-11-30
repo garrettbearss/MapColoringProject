@@ -69,34 +69,34 @@ class MapColoringAlgorithm:
     def getLeastConstrainedCounty(self, counties):
         #Gets the county with the most possible colors.
         #Sets the maximum number of colors to -1 and the least constrained county to None.
-        max_colors = -1
-        least_constrained = None
+        maxColors = -1
+        leastConstrained = None
         #Iterates through the counties.
         for county in counties:
             #If the county is not colored.
             if self.coloring[county] is None:
                 #Sets the number of possible colors to the number of colors that are valid for the county.
-                possible_colors = sum(1 for color in self.colors if self.checkColor(county, color))
+                possibleColors = sum(1 for color in self.colors if self.checkColor(county, color))
                 #If the number of possible colors is greater than the maximum number of colors.
-                if possible_colors > max_colors:
+                if possibleColors > maxColors:
                     #Sets the maximum number of colors to the number of possible colors and the least constrained county to the current county.
-                    max_colors = possible_colors
-                    least_constrained = county
+                    maxColors = possibleColors
+                    leastConstrained = county
         #Returns the least constrained county.
-        return least_constrained
+        return leastConstrained
     
     def selectNextCounty(self, counties):
         #Selects the next county to color.
         #Gets the most constrained county.
-        most_constrained = self.getMostConstrainedCounty(counties)
+        mostConstrained = self.getMostConstrainedCounty(counties)
         #If the most constrained county is not None, return the most constrained county.
-        if most_constrained:
-            return most_constrained
+        if mostConstrained:
+            return mostConstrained
         #Gets the most constraining county.
-        most_constraining = self.getMostConstrainingCounty(counties)
+        mostConstraining = self.getMostConstrainingCounty(counties)
         #If the most constraining county is not None, return the most constraining county.
-        if most_constraining:
-            return most_constraining
+        if mostConstraining:
+            return mostConstraining
         #Gets the least constrained county.
         return self.getLeastConstrainedCounty(counties)
     
@@ -106,11 +106,11 @@ class MapColoringAlgorithm:
         if not counties:
             return True
         #Selects the next county to color using heuristics.
-        next_county = self.selectNextCounty(counties)
+        nextCounty = self.selectNextCounty(counties)
         #If the next county is a Great Lake or one of the Oceans.
-        if next_county in greatLakesAndOceans:
+        if nextCounty in greatLakesAndOceans:
             #Colors the next county blue.
-            self.coloring[next_county] = 'Blue'
+            self.coloring[nextCounty] = 'Blue'
             #Prints the look ahead table.
             self.printLookAheadTable()
             #Shows the graph.
@@ -118,17 +118,17 @@ class MapColoringAlgorithm:
             #If the look ahead table doesn't result in a county having no remaining color.
             if self.checkLookAheadTable():
                 #Recursively calls the backtrack function with the remaining counties.
-                if self.backtrack([county for county in counties if county != next_county]):
+                if self.backtrack([county for county in counties if county != nextCounty]):
                     return True
             #Sets the color of the next county to None.
-            self.coloring[next_county] = None
+            self.coloring[nextCounty] = None
         else:
             #Iterates through the colors.
             for color in self.colors:
                 #If the color is valid for the next county.
-                if self.checkColor(next_county, color):
+                if self.checkColor(nextCounty, color):
                     #Sets the color of the next county to the color.
-                    self.coloring[next_county] = color
+                    self.coloring[nextCounty] = color
                     #Prints the look ahead table.
                     self.printLookAheadTable()
                     #Shows the graph.
@@ -136,21 +136,21 @@ class MapColoringAlgorithm:
                     #If the look ahead table doesn't result in a county having no remaining color.
                     if self.checkLookAheadTable():
                         #Recursively calls the backtrack function with the remaining counties.
-                        if self.backtrack([county for county in counties if county != next_county]):
+                        if self.backtrack([county for county in counties if county != nextCounty]):
                             return True
                     #Sets the color of the next county to None.
-                    self.coloring[next_county] = None
+                    self.coloring[nextCounty] = None
         #Returns False if the color of the next county cannot be set.
         return False
     
-    def colorMap(self, initial_county):
+    def colorMap(self, initialCounty):
         #Colors the map using backtracking.
         #Sets the initial county to the first county in the list of counties.
         counties = list(self.counties.keys())
         #Removes the initial county from the list of counties.
-        counties.remove(initial_county)
+        counties.remove(initialCounty)
         #Inserts the initial county at the beginning of the list of counties.
-        counties.insert(0, initial_county)
+        counties.insert(0, initialCounty)
         #Sets the color of the initial county to the first color in the list of colors.
         if self.backtrack(counties):
             return self.coloring
@@ -164,9 +164,9 @@ class MapColoringAlgorithm:
             #If the county is not colored.
             if self.coloring[county] is None:
                 #Gets the possible colors for the county.
-                possible_colors = {color for color in self.colors if self.checkColor(county, color)}
+                possibleColors = {color for color in self.colors if self.checkColor(county, color)}
                 #If there are no possible colors for the county, return False.
-                if not possible_colors:
+                if not possibleColors:
                     return False
         #Returns True if all counties have possible colors.
         return True
@@ -180,9 +180,9 @@ class MapColoringAlgorithm:
                 print(f"{county}: {self.coloring[county]}")
             else:
                 #Gets the possible colors for the county.
-                possible_colors = {color for color in self.colors if self.checkColor(county, color)}
+                possibleColors = {color for color in self.colors if self.checkColor(county, color)}
                 #Prints the county and the possible colors.
-                print(f"{county}: {possible_colors}")
+                print(f"{county}: {possibleColors}")
         print("\n")
     
     def showGraph(self):
@@ -198,17 +198,17 @@ class MapColoringAlgorithm:
                 G.add_edge(county, neighbor)
         
         #Sets the color map for the graph.
-        color_map = []
+        colorMap = []
         #Iterates through the nodes in the graph.
         for node in G:
             #If the node is colored, appends the color to the color map.
             if node in self.coloring and self.coloring[node] is not None:
                 #Appends the color to the color map.
-                color_map.append(self.coloring[node])
+                colorMap.append(self.coloring[node])
             #If the node is not colored, appends gray to the color map.
             else:
                 #Appends gray to the color map.
-                color_map.append('gray')  # Default color for uncolored nodes
+                colorMap.append('gray')  # Default color for uncolored nodes
 
         #Sets the position of the nodes in the graph.
         pos = nx.spring_layout(G)
@@ -222,7 +222,7 @@ class MapColoringAlgorithm:
         #figManager.window.showMaximized()
 
         #Draws the graph.
-        nx.draw(G, pos, node_color=color_map, with_labels=True, node_size=500, font_size=10, font_color='black')
+        nx.draw(G, pos, node_color=colorMap, with_labels=True, node_size=500, font_size=10, font_color='black')
         #Shows the graph.
         plt.show()
 
