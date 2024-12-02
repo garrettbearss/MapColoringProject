@@ -9,6 +9,7 @@ Using a json file containing Ohio's counties and the following heuristics:
 - Most Constrained
 - Most Contraining
 - Least Constrained
+
 Color the map of Ohio's counties with each county having different colors than neighboring
 counties. The graph is displayed at each step along with the lookahead table. After giving
 the inital county it employs the heurisitics to recursively color the map checking with the
