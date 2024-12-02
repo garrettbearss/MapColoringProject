@@ -5,6 +5,7 @@ constraint based programming. Color the water sources such as lakes and sea blue
 adjoining counties (or states) with four colors different than the counties.
 
 Problem Solution:
+
 Using a json file containing Ohio's counties and the following heuristics:
 - Most Constrained
 - Most Contraining
