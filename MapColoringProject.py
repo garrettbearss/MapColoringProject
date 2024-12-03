@@ -1,10 +1,11 @@
 # MapColoringProject.py
-# Garrett Bearss
-# 12/??/24
+# Garrett Bearss, Srinivasa Sai Keerthan Challa, Leslie Nworie
+# 12/8/24
 
 import json
 import matplotlib.pyplot as plt
 import networkx as nx
+import scipy as sp
 
 #Note: Change file path to the location of the OhioCountyData.json file.
 filePath = r"C:\Users\garre\Downloads\MapColoringProject\OhioCountyData.json"
@@ -211,7 +212,9 @@ class MapColoringAlgorithm:
                 colorMap.append('gray')  # Default color for uncolored nodes
 
         #Sets the position of the nodes in the graph.
-        pos = nx.spring_layout(G)
+        pos = nx.kamada_kawai_layout(G)
+        #If graph has two or more clusters
+        #pos = nx.spring_layout(G)
 
         #Shows the graph.
         figManager = plt.get_current_fig_manager()
@@ -219,7 +222,7 @@ class MapColoringAlgorithm:
         #For Windows
         figManager.window.state('zoomed')
         # For other operating systems
-        #figManager.window.showMaximized()
+        #figManager.window.showMaximized
 
         #Draws the graph.
         nx.draw(G, pos, node_color=colorMap, with_labels=True, node_size=500, font_size=10, font_color='black')
