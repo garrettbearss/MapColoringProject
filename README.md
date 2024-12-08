@@ -20,4 +20,5 @@ lookahead table to make sure there is a viable solution to the map at each state
 Note:
 
 In order to run the program you will need to modify the path of the json file to where it is
-stored on the machine running the program.
+stored on the machine running the program. You will also need to install all libraries used in 
+MapColoringProject.py
