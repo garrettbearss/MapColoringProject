@@ -30,84 +30,111 @@ class MapColoringAlgorithm:
         return True
     
     def getMostConstrainedCounty(self, counties):
-        #Gets the county with the fewest possible colors.
-        #Sets the minimum number of colors to infinity and the most constrained county to None.
+        #Gets the most constrained county.
+        #Initializes the minimum number of colors and the most constrained county.
         minColors = float('inf')
-        mostConstrained = None
+        mostConstrained = []
         #Iterates through the counties.
         for county in counties:
             #If the county is not colored.
             if self.coloring[county] is None:
-                #Sets the number of possible colors to the number of colors that are valid for the county.
+                #Gets the number of possible colors for the county.
                 possibleColors = sum(1 for color in self.colors if self.checkColor(county, color))
                 #If the number of possible colors is less than the minimum number of colors.
                 if possibleColors < minColors:
-                    #Sets the minimum number of colors to the number of possible colors and the most constrained county to the current county.
+                    #Sets the minimum number of colors to the number of possible colors.
                     minColors = possibleColors
-                    mostConstrained = county
+                    #Sets the most constrained county to the county.
+                    mostConstrained = [county]
+                #If the number of possible colors is equal to the minimum number of colors.
+                elif possibleColors == minColors:
+                    #Appends the county to the most constrained county.
+                    mostConstrained.append(county)
         #Returns the most constrained county.
         return mostConstrained
-    
+
     def getMostConstrainingCounty(self, counties):
-        #Gets the county with the most constraints.
-        #Sets the maximum number of constraints to -1 and the most constraining county to None.
+        #Gets the most constraining county.
+        #Initializes the maximum number of constraints and the most constraining county.
         maxConstraints = -1
-        mostConstraining = None
+        mostConstraining = []
         #Iterates through the counties.
         for county in counties:
             #If the county is not colored.
             if self.coloring[county] is None:
-                #Sets the number of constraints to the number of uncolored neighbors.
+                #Gets the number of constraints for the county.
                 constraints = sum(1 for neighbor in self.counties[county] if self.coloring[neighbor] is None)
                 #If the number of constraints is greater than the maximum number of constraints.
                 if constraints > maxConstraints:
-                    #Sets the maximum number of constraints to the number of constraints and the most constraining county to the current county.
+                    #Sets the maximum number of constraints to the number of constraints.
                     maxConstraints = constraints
-                    mostConstraining = county
+                    #Sets the most constraining county to the county.
+                    mostConstraining = [county]
+                #If the number of constraints is equal to the maximum number of constraints.
+                elif constraints == maxConstraints:
+                    #Appends the county to the most constraining county.
+                    mostConstraining.append(county)
         #Returns the most constraining county.
         return mostConstraining
-    
+
     def getLeastConstrainedCounty(self, counties):
-        #Gets the county with the most possible colors.
-        #Sets the maximum number of colors to -1 and the least constrained county to None.
+        #Gets the least constrained county.
+        #Initializes the maximum number of colors and the least constrained county.
         maxColors = -1
-        leastConstrained = None
+        leastConstrained = []
         #Iterates through the counties.
         for county in counties:
             #If the county is not colored.
             if self.coloring[county] is None:
-                #Sets the number of possible colors to the number of colors that are valid for the county.
+                #Gets the number of possible colors for the county.
                 possibleColors = sum(1 for color in self.colors if self.checkColor(county, color))
                 #If the number of possible colors is greater than the maximum number of colors.
                 if possibleColors > maxColors:
-                    #Sets the maximum number of colors to the number of possible colors and the least constrained county to the current county.
+                    #Sets the maximum number of colors to the number of possible colors.
                     maxColors = possibleColors
-                    leastConstrained = county
+                    #Sets the least constrained county to the county.
+                    leastConstrained = [county]
+                #If the number of possible colors is equal to the maximum number of colors.
+                elif possibleColors == maxColors:
+                    #Appends the county to the least constrained county.
+                    leastConstrained.append(county)
         #Returns the least constrained county.
         return leastConstrained
-    
-    def selectNextCounty(self, counties):
-        #Selects the next county to color.
-        #Gets the most constrained county.
+
+    def selectNextCounty(self, counties, initialCounty):
+        #Selects the next county to color using heuristics.
+        # Prioritize the initial county if it is uncolored.
+        if self.coloring[initialCounty] is None:
+            return initialCounty
+
+        # Get the most constrained county
         mostConstrained = self.getMostConstrainedCounty(counties)
-        #If the most constrained county is not None, return the most constrained county.
-        if mostConstrained:
-            return mostConstrained
-        #Gets the most constraining county.
-        mostConstraining = self.getMostConstrainingCounty(counties)
-        #If the most constraining county is not None, return the most constraining county.
-        if mostConstraining:
-            return mostConstraining
-        #Gets the least constrained county.
-        return self.getLeastConstrainedCounty(counties)
+        # If there's only one most constrained county, return it.
+        if len(mostConstrained) == 1:
+            return mostConstrained[0]
+        
+        # Get the most constraining county among the most constrained counties.
+        mostConstraining = self.getMostConstrainingCounty(mostConstrained)
+        # If there's only one most constraining county, return it.
+        if len(mostConstraining) == 1:
+            return mostConstraining[0]
+        
+        # Get the least constrained county among the most constraining counties.
+        leastConstrained = self.getLeastConstrainedCounty(mostConstraining)
+        # If there's only one least constrained county, return it
+        if len(leastConstrained) == 1:
+            return leastConstrained[0]
+        
+        # If there are multiple least constrained counties, return the first one.
+        return leastConstrained[0]
     
-    def backtrack(self, counties):
+    def backtrack(self, counties, initialCounty):
         #Backtracks through the counties.
         #If there are no counties left to color, return True.
         if not counties:
             return True
         #Selects the next county to color using heuristics.
-        nextCounty = self.selectNextCounty(counties)
+        nextCounty = self.selectNextCounty(counties, initialCounty)
         #If the next county is a Great Lake or one of the Oceans.
         if nextCounty in greatLakesAndOceans:
             #Colors the next county blue.
@@ -119,7 +146,7 @@ class MapColoringAlgorithm:
             #If the look ahead table doesn't result in a county having no remaining color.
             if self.checkLookAheadTable():
                 #Recursively calls the backtrack function with the remaining counties.
-                if self.backtrack([county for county in counties if county != nextCounty]):
+                if self.backtrack([county for county in counties if county != nextCounty], initialCounty):
                     return True
             #Sets the color of the next county to None.
             self.coloring[nextCounty] = None
@@ -137,7 +164,7 @@ class MapColoringAlgorithm:
                     #If the look ahead table doesn't result in a county having no remaining color.
                     if self.checkLookAheadTable():
                         #Recursively calls the backtrack function with the remaining counties.
-                        if self.backtrack([county for county in counties if county != nextCounty]):
+                        if self.backtrack([county for county in counties if county != nextCounty], initialCounty):
                             return True
                     #Sets the color of the next county to None.
                     self.coloring[nextCounty] = None
@@ -153,19 +180,22 @@ class MapColoringAlgorithm:
         #Inserts the initial county at the beginning of the list of counties.
         counties.insert(0, initialCounty)
         #Sets the color of the initial county to the first color in the list of colors.
-        if self.backtrack(counties):
+        if self.backtrack(counties, initialCounty):
             return self.coloring
         #Returns None if the map cannot be colored.
         return None
     
     def checkLookAheadTable(self):
-        #Checks if the look ahead table results in a county having no remaining color.
-        #Iterates through the counties.
+    #Checks if the look ahead table results in a county having no remaining color.
+    #Iterates through the counties.
         for county in self.counties:
             #If the county is not colored.
             if self.coloring[county] is None:
                 #Gets the possible colors for the county.
                 possibleColors = {color for color in self.colors if self.checkColor(county, color)}
+                #If the county is in the list of lakes and oceans, set possible colors to Blue.
+                if county in greatLakesAndOceans:
+                    possibleColors = {'Blue'}
                 #If there are no possible colors for the county, return False.
                 if not possibleColors:
                     return False
@@ -182,6 +212,9 @@ class MapColoringAlgorithm:
             else:
                 #Gets the possible colors for the county.
                 possibleColors = {color for color in self.colors if self.checkColor(county, color)}
+                #If the county is in the list of lakes and oceans, set possible colors to Blue.
+                if county in greatLakesAndOceans:
+                    possibleColors = {'Blue'}
                 #Prints the county and the possible colors.
                 print(f"{county}: {possibleColors}")
         print("\n")
